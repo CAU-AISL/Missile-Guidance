@@ -1,0 +1,49 @@
+% Preallocation
+H=zeros(1,10000);
+X=zeros(1,10000);
+count=0;
+XMAX=6;
+XMIN=-6;
+RANGE=XMAX-XMIN;
+TMP=1./sqrt(6.28);
+N=100;
+BIN=50;
+for I=1:N
+    SUM=0;
+    for J=1:12
+        RAND=rand(1);
+        SUM=SUM+RAND;
+    end
+    X(I)=SUM-6; % X는 Listing 4.1에서 만든값
+end
+for I=1:BIN
+    H(I)=0;
+end
+% FIX는 0 방향으로 반올림
+for I=1:N
+    K=fix(((X(I)-XMIN)/RANGE)*BIN)+.99; 
+    if K < 1, K=1; end
+    if K > BIN, K=BIN; end
+    % K에는 1~50 사이의 소수이 나옴
+    K=round(K);
+    H(K)=H(K)+1; %H는 확률을 위한 개수얻음
+end
+
+for K=1:BIN
+    PDF=(H(K)/N)*BIN/RANGE; %확률 *bin/ra
+    AB=XMIN+K*RANGE/BIN;
+    TH=TMP*exp(-AB*AB/2.);
+    count=count+1;
+    ArrayAB(count)=AB;
+    ArrayPDF(count)=PDF;
+    ArrayTH(count)=TH;
+end
+figure
+plot(ArrayAB,ArrayPDF,ArrayAB,ArrayTH),grid
+title('Sample Gaussian distribution')
+xlabel('X')
+ylabel('Probability Density Function')
+clc
+output=[ArrayAB,ArrayPDF,ArrayTH];
+save datfil output -ascii
+disp 'simulation finished'
