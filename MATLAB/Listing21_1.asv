@@ -1,0 +1,106 @@
+n=0;
+VM=3000.; %미사일 속도
+A=1000.;% 소리 속도
+XMACH=VM/A; %마하 값
+B=sqrt(XMACH^2-1);% normal force 방정식 매개변수
+
+DEL=5./57.3; % 5도 deflection = 5*PI/360
+ALT=0.; % 고도
+DIAM=1.; %동체 지름
+FR=3.; %Radome 길이
+XL=20.; % 로켓 길이
+XHL=19.5; % Hinge까지 길이
+XCG=10.; % 무게중심까지 길이 (가정)
+
+CTW=0.; % Wing tip length
+CRW=6.; % Wing root length
+HW=2.; % Wing height
+
+CTT=0.; % Tail tip length
+CRT=2.; % Tail root length
+HT=2.; % Tail height
+
+XN=4.;
+WGT=1000.;% weight missile
+if ALT<=30000.
+    RHO=.002378*exp(-ALT/30000.);% 밀도
+else
+    RHO=.0034*exp(-ALT/22000.); % 밀도
+end
+
+SREF=3.1416*DIAM*DIAM/4.;%Reference area
+S_WING=.5*HW*(CTW+CRW);% wing area
+S_TAIL=.5*HT*(CTT+CRT);% tail area
+
+SPLAN=(XL-XLP)*DIAM+1.33*XLP*DIAM/2.; %Planform Area
+
+XLP=FR*DIAM; %L'
+
+AN=.67*XLP*DIAM; % nose Area(?)
+AB=(XL-XLP)*DIAM; % Body Area
+
+XCPN=2*XLP/3; % nose의 압력중심
+XCPB=(.67*AN*XLP+AB*(XLP+.5*(XL-XLP)))/(AN+AB); % body의 압력중심
+XCPW=XLP+XN+.7*CRW-.2*CTW; % wing의 압력중심
+
+XIYY=WGT*(3*((DIAM/2)^2)+XL*XL)/(12*32.2); % 미사일 관성 모멘트
+
+TMP1=(XCG-XCPW)/DIAM;
+TMP2=(XCG-XHL)/DIAM;
+TMP3=(XCG-XCPB)/DIAM;
+TMP4=(XCG-XCPN)/DIAM;
+
+Q=.5*RHO*VM*VM; %동력압력
+THD=0; %theta dot
+
+ALF=0;% angle of attack
+
+T=0; % time
+H=.0025; %time step
+S=0.;
+while T<1.99999
+    THD_OLD=THD;
+    ALF_OLD=ALF;
+    STEP=1;
+    FLAG=0;
+    while STEP<=1
+        if FLAG==1
+            STEP=2;
+            THD=THD+H*THDD;
+            ALF=ALF+H*ALFD;
+            T=T+H;
+        end
+
+        %Normal force coefficient
+        CN=2*ALF+1.5*SPLAN*ALF*ALF/SREF+8*S_WING*ALF/(B*SREF)+8*S_TAIL*(ALF+DEL)/(B*SREF);
+        %Normal force coefficient
+        CM=2*ALF*TMP4+1.5*SPLAN*ALF*ALF*TMP3/SREF+8*S_WING*ALF*TMP1/(B*SREF)+8*S_TAIL*(ALF+DEL)*TMP2/(B*SREF);
+
+        THDD=Q*SREF*DIAM*CM/XIYY; % 각가속도 theta_dotdot
+        XNL=32.2*Q*SREF*CN/WGT; % normal 가속도 nB
+
+        ALFD=THD-XNL/VM; % alpha dot
+        FLAG=1;
+    end
+    FLAG=0;
+    THD=.5*(THD_OLD+THD+H*THDD); %second order runge-kutta method (w1=0.5, w2 =0.5)
+    ALF=.5*(ALF_OLD+ALF+H*ALFD); %second order runge-kutta method (w1=0.5, w2 =0.5)
+    S=S+H;
+    if S>=.0099999 %4번마다 한번씩 기록
+        S=0.;
+        n=n+1;
+        ArrayT(n)=T;
+        ArrayXNLG(n)=XNL/32.2;
+        ArrayALFDEG(n)=ALF*57.3;
+    end
+end
+figure
+plot(ArrayT,ArrayXNLG),grid
+xlabel('Time (Sec)')
+ylabel('Missile Acceleration (G)')
+figure
+plot(ArrayT,ArrayALFDEG),grid
+xlabel('Time (Sec)')
+ylabel('Angle of Attack (Deg)')
+clc
+output=[ArrayT,ArrayXNLG,ArrayALFDEG];
