@@ -1,0 +1,11 @@
+Normal Force F_N
+Normal Force coefficient C_N
+Dynamic pressure Q
+Reference Area S_ref
+density RHO
+Angle of Attack alpha
+control surface deflection delta
+Wing area S_W
+Tail area S_T
+Planform area S_PLAN
+

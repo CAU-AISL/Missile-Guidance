@@ -5,7 +5,7 @@ XMACH=VM/A; %마하 값
 B=sqrt(XMACH^2-1);% normal force 방정식 매개변수
 
 DEL=5./57.3; % 5도 deflection = 5*PI/360
-ALT=0.; % 고도
+
 DIAM=1.; %동체 지름
 FR=3.; %Radome 길이
 XL=20.; % 로켓 길이
@@ -22,6 +22,8 @@ HT=2.; % Tail height
 
 XN=4.;
 WGT=1000.;% weight missile
+
+ALT=0.;
 if ALT<=30000.
     RHO=.002378*exp(-ALT/30000.);% 밀도
 else
@@ -32,9 +34,9 @@ SREF=3.1416*DIAM*DIAM/4.;%Reference area
 S_WING=.5*HW*(CTW+CRW);% wing area
 S_TAIL=.5*HT*(CTT+CRT);% tail area
 
-SPLAN=(XL-XLP)*DIAM+1.33*XLP*DIAM/2.; %Planform Area
-
 XLP=FR*DIAM; %L'
+
+SPLAN=(XL-XLP)*DIAM+1.33*XLP*DIAM/2.; %Planform Area
 
 AN=.67*XLP*DIAM; % nose Area(?)
 AB=(XL-XLP)*DIAM; % Body Area
